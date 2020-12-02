@@ -13,3 +13,10 @@
 1. Clone the repository
 2. Create a .env file with the following
 ```
+CONSUMER_KEY=insert consumer key
+CONSUMER_SECRET=insert consumer secret
+API_KEY=insert api key
+API_SECRET=insert api secret
+```
+3. open the file using `pipenv shell`
+4. run the file using `python twitter.py`
