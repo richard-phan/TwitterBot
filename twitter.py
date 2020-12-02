@@ -1,4 +1,5 @@
 import tweepy
+import os
 
 class StreamListener(tweepy.StreamListener):
     
@@ -6,10 +7,10 @@ class StreamListener(tweepy.StreamListener):
         print(status.text)
 
 
-auth = tweepy.OAuthHandler(consumer_key='Thkg7wftUYpTaDzHWOQFHN8Pj',
-                           consumer_secret='zr8hkYXvTBcmI3NmCU3lIdvlJfqliKpXbaxKitjD7fg0PMhJWf')
-auth.set_access_token('1224788279381262336-BgbFJjrqktqhiowCrBRKcfyMPQJ4zH', 
-                      'YHtojSlaQM8LnzxrKVLwqzeEaUJ4iyPGhqqWjF9VXORwX')
+auth = tweepy.OAuthHandler(consumer_key=os.getenv('CONSUMER_KEY'),
+                           consumer_secret=os.getenv('CONSUMER_SECRET'))
+auth.set_access_token(os.getenv('API_KEY'), 
+                      os.getenv('API_SECRET'))
 
 api = tweepy.API(auth)
 
