@@ -2,6 +2,7 @@ import tweepy
 import os
 import urllib.request
 import json
+from board import Board, Piece
 
 class StreamListener(tweepy.StreamListener):
     
@@ -10,8 +11,8 @@ class StreamListener(tweepy.StreamListener):
             covid_data = json.loads(request.read().decode())
 
             days_ago = 0
-            if len(msg) > 1:
-                days_ago = int(msg[1])
+            if len(msg) > 2:
+                days_ago = int(msg[2])
 
             stats = covid_data[days_ago]
             raw_date = str(stats['date'])
@@ -30,12 +31,26 @@ class StreamListener(tweepy.StreamListener):
                 in_reply_to_status_id=data['id']
             )
 
+    def send_tic_tac_toe(self, data, board_string):
+        api.update_status(board_string, in_reply_to_status_id=data['id'])
+
     def on_status(self, status):
         data = status._json
         
         msg = data['text'].split(' ')
 
-        self.send_tweet(data, msg)
+        if len(msg) > 1 and msg[1] == 'covid':
+            self.send_tweet(data, msg)
+
+        print(msg)
+        if len(msg) == 3 and msg[1] == 'tictactoe':
+            try:
+                board.turn(Piece.CROSS, int(msg[2]) - 1)
+            except:
+                'error'
+
+            api.update_status(board.board_string())
+
 
 auth = tweepy.OAuthHandler(consumer_key=os.getenv('CONSUMER_KEY'),
                            consumer_secret=os.getenv('CONSUMER_SECRET'))
@@ -43,6 +58,9 @@ auth.set_access_token(os.getenv('API_KEY'),
                       os.getenv('API_SECRET'))
 
 api = tweepy.API(auth)
+
+board = Board()
+api.update_status(board.board_string())
 
 streamListener = StreamListener()
 stream = tweepy.Stream(auth=api.auth, listener=streamListener)
