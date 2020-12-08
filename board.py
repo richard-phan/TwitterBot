@@ -111,8 +111,11 @@ class Board():
 
         # checks for a win
         win = self.check_win(piece, pos)
-        if win:
+        if win == Piece.CROSS:
             return Piece.CROSS
+
+        if win == '-1':
+            return '-1'
 
         # ai turn
         raw_string = self.board_raw_string()
@@ -134,7 +137,10 @@ class Board():
 
         # checks for a win
         win = self.check_win(Piece.CIRCLE, json_data['recommendation'])
-        if win:
+        if win == Piece.CIRCLE:
             return Piece.CIRCLE
+
+        if win == '-1':
+            return '-1'
 
         return None

@@ -46,8 +46,9 @@ class StreamListener(tweepy.StreamListener):
         if len(msg) == 3 and msg[1] == 'tictactoe':
             try:
                 win = board.turn(Piece.CROSS, int(msg[2]) - 1)
+                print(win)
             except:
-                'error'
+                print('error')
 
             # sends messages
             if win == '-1':
