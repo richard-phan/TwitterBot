@@ -6,7 +6,8 @@ from board import Board, Piece
 
 class StreamListener(tweepy.StreamListener):
     
-    def send_tweet(self, data, msg):
+    def send_covid_tweet(self, data, msg):
+        # gets covid data
         with urllib.request.urlopen('https://api.covidtracking.com/v1/us/daily.json') as request:
             covid_data = json.loads(request.read().decode())
 
@@ -18,6 +19,7 @@ class StreamListener(tweepy.StreamListener):
             raw_date = str(stats['date'])
             date = raw_date[:4] + '-' + raw_date[4:6] + '-' + raw_date[6:]
 
+            # sends the status
             api.update_status(
                 'COVID STATISTICS'
                 + '\n--------------------'
@@ -31,27 +33,31 @@ class StreamListener(tweepy.StreamListener):
                 in_reply_to_status_id=data['id']
             )
 
-    def send_tic_tac_toe(self, data, board_string):
-        api.update_status(board_string, in_reply_to_status_id=data['id'])
-
+    # gets status events from twitter
     def on_status(self, status):
         data = status._json
         
         msg = data['text'].split(' ')
 
         if len(msg) > 1 and msg[1] == 'covid':
-            self.send_tweet(data, msg)
+            self.send_covid_tweet(data, msg)
 
         print(msg)
         if len(msg) == 3 and msg[1] == 'tictactoe':
             try:
-                board.turn(Piece.CROSS, int(msg[2]) - 1)
+                win = board.turn(Piece.CROSS, int(msg[2]) - 1)
             except:
                 'error'
 
-            api.update_status(board.board_string())
+            # sends messages
+            if win == '-1':
+                api.update_status(board.board_string() + '\nStalemate')
+            elif win:
+                api.update_status(board.board_string() + '\nWinner: ' + win.value)
+            else:
+                api.update_status(board.board_string())
 
-
+#authentication information
 auth = tweepy.OAuthHandler(consumer_key=os.getenv('CONSUMER_KEY'),
                            consumer_secret=os.getenv('CONSUMER_SECRET'))
 auth.set_access_token(os.getenv('API_KEY'), 
@@ -59,9 +65,11 @@ auth.set_access_token(os.getenv('API_KEY'),
 
 api = tweepy.API(auth)
 
+# initialize the board
 board = Board()
 api.update_status(board.board_string())
 
+# stream listener
 streamListener = StreamListener()
 stream = tweepy.Stream(auth=api.auth, listener=streamListener)
 
